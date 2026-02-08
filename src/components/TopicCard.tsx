@@ -31,6 +31,7 @@ interface TopicCardProps {
   onToggleStarQuestion: (id: string) => void;
   onToggleStarTopic: (id: string) => void;
   onToggleStarSubTopic: (id: string) => void;
+  onNotes: (question: Question) => void;
 }
 
 const TopicCard = ({
@@ -51,6 +52,7 @@ const TopicCard = ({
   onToggleStarQuestion,
   onToggleStarTopic,
   onToggleStarSubTopic,
+  onNotes,
 }: TopicCardProps) => {
   const store = useQuestionStore();
   const expanded = store.expandedTopics[topic.id] ?? false;
@@ -275,6 +277,7 @@ const TopicCard = ({
                                           onDelete={onDeleteQuestion}
                                           onToggle={onToggleQuestion}
                                           onToggleStar={onToggleStarQuestion}
+                                          onNotes={onNotes}
                                         />
                                       ))}
                                       {droppableProvided.placeholder}
@@ -310,6 +313,7 @@ const TopicCard = ({
                           onDelete={onDeleteQuestion}
                           onToggle={onToggleQuestion}
                           onToggleStar={onToggleStarQuestion}
+                          onNotes={onNotes}
                         />
                       ))}
                       {droppableProvided.placeholder}

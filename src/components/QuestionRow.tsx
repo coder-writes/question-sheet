@@ -1,4 +1,4 @@
-import { GripVertical, ExternalLink, Pencil, Trash2, Star } from 'lucide-react';
+import { GripVertical, ExternalLink, Pencil, Trash2, Star, StickyNote } from 'lucide-react';
 import { Draggable } from '@hello-pangea/dnd';
 import type { Question } from '@/types';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,7 @@ interface QuestionRowProps {
   onDelete: (id: string) => void;
   onToggle: (id: string) => void;
   onToggleStar: (id: string) => void;
+  onNotes: (question: Question) => void;
 }
 
 const difficultyColor: Record<string, string> = {
@@ -25,7 +26,8 @@ const QuestionRow = ({
   onEdit, 
   onDelete, 
   onToggle,
-  onToggleStar 
+  onToggleStar,
+  onNotes  
 }: QuestionRowProps) => {
   return (
     <Draggable draggableId={question.id} index={index}>
@@ -89,6 +91,15 @@ const QuestionRow = ({
           </Button>
 
           <div className="flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => onNotes(question)}
+              title="Add Notes"
+            >
+              <StickyNote className={`h-3 w-3 ${question.notes ? 'fill-current text-primary' : ''}`} />
+            </Button>
             <Button
               variant="ghost"
               size="icon"

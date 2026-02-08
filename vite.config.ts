@@ -22,5 +22,19 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173
-  }
+  },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-label', '@radix-ui/react-scroll-area', '@radix-ui/react-select', '@radix-ui/react-slot', '@radix-ui/react-tabs', 'class-variance-authority', 'clsx', 'tailwind-merge', 'lucide-react', 'sonner'],
+          'dnd-vendor': ['@hello-pangea/dnd'],
+          'query-vendor': ['@tanstack/react-query'],
+          'utils-vendor': ['zod', 'zustand', 'next-themes'],
+        },
+      },
+    },
+  },
 })

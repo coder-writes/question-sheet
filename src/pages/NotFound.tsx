@@ -1,6 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
-import notFoundImage from "@/assets/image.png";
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { Button } from "@/components/ui/button";
 
 const NotFound = () => {
@@ -38,10 +38,11 @@ const NotFound = () => {
       </Link>
 
       <div className="mt-12">
-        <img 
-          src={notFoundImage} 
-          alt="404 Owl" 
-          className="mx-auto max-w-[280px] sm:max-w-md"
+        <DotLottieReact
+          src="https://lottie.host/eab476bf-54ae-410d-b9b8-2bd900857db8/Zxj9ENsvQa.lottie"
+          loop
+          autoplay
+          className="mx-auto max-w-[450px] sm:max-w-4xl"
         />
       </div>
     </div>

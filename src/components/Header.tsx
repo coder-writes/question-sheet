@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { useTheme } from '@/components/theme-provider';
 import { toast } from "sonner";
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import Sidebar from './Sidebar';
 
 interface HeaderProps {
   totalQuestions: number;
@@ -26,6 +28,7 @@ const Header = ({
   onRandomQuestion
 }: HeaderProps) => {
   const { theme, setTheme } = useTheme();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   // Calculate progress percentage
   const progress = totalQuestions > 0 ? (completedQuestions / totalQuestions) * 100 : 0;
@@ -57,11 +60,9 @@ const Header = ({
       {/* Top Navigation Bar */}
       <div className="flex h-14 items-center justify-between px-4 sm:px-6 border-b">
         <div className="flex items-center gap-4">
-          <Link to="/nopage">
-            <Button variant="ghost" size="icon" className="h-9 w-9">
-              <Menu className="h-5 w-5 text-muted-foreground" />
-            </Button>
-          </Link>
+          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setIsSidebarOpen(true)}>
+            <Menu className="h-5 w-5 text-muted-foreground" />
+          </Button>
           
           <div className="hidden items-center gap-2 text-sm text-muted-foreground sm:flex">
             <Link to="/nopage" className="flex items-center gap-2 hover:text-foreground">
@@ -185,6 +186,7 @@ const Header = ({
           </div>
         </div>
       </div>
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
     </div>
   );
 };

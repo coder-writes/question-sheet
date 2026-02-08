@@ -10,6 +10,7 @@ import { ProfileDialog } from '@/components/ProfileDialog';
 import { Loader2 } from 'lucide-react';
 import { toast } from "sonner";
 import RandomQuestionDialog from '@/components/RandomQuestionDialog';
+import NotesDialog from '@/components/NotesDialog';
 
 const Index = () => {
   const store = useQuestionStore();
@@ -233,6 +234,10 @@ const Index = () => {
     },
     [dialog, store]
   );
+  
+  const handleSaveNotes = useCallback((id: string, notes: string) => {
+    store.editQuestion(id, { notes });
+  }, [store]);
 
   const dialogConfig = (() => {
     if (!dialog) return null;
@@ -368,6 +373,7 @@ const Index = () => {
                     onToggleStarQuestion={(id) => store.toggleStarQuestion(id)}
                     onToggleStarTopic={(id) => store.toggleStarTopic(id)}
                     onToggleStarSubTopic={(id) => store.toggleStarSubTopic(id)}
+                    onNotes={(q) => store.setDialog({ type: 'notes', question: q })}
                   />
                 ))}
                 {provided.placeholder}
@@ -404,6 +410,15 @@ const Index = () => {
         onOpenChange={setRandomDialogOpen}
         question={randomQuestion}
       />
+      
+      {dialog?.type === 'notes' && (
+        <NotesDialog
+          open={true}
+          onClose={() => store.setDialog(null)}
+          question={dialog.question}
+          onSave={handleSaveNotes}
+        />
+      )}
     </div>
   );
 };

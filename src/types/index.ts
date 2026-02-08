@@ -100,4 +100,5 @@ export type DialogMode =
   | { type: 'editSubTopic'; subTopic: SubTopic }
   | { type: 'addQuestion'; topicId: string; subTopicId?: string }
   | { type: 'editQuestion'; question: Question }
+  | { type: 'notes'; question: Question }
   | null;
