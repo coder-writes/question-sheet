@@ -1,4 +1,4 @@
-import { GripVertical, ExternalLink, Pencil, Trash2 } from 'lucide-react';
+import { GripVertical, ExternalLink, Pencil, Trash2, Star } from 'lucide-react';
 import { Draggable } from '@hello-pangea/dnd';
 import type { Question } from '@/types';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,8 @@ interface QuestionRowProps {
   index: number;
   onEdit: (question: Question) => void;
   onDelete: (id: string) => void;
+  onToggle: (id: string) => void;
+  onToggleStar: (id: string) => void;
 }
 
 const difficultyColor: Record<string, string> = {
@@ -17,7 +19,14 @@ const difficultyColor: Record<string, string> = {
   Hard: 'bg-destructive/15 text-destructive border-destructive/20',
 };
 
-const QuestionRow = ({ question, index, onEdit, onDelete }: QuestionRowProps) => {
+const QuestionRow = ({ 
+  question, 
+  index, 
+  onEdit, 
+  onDelete, 
+  onToggle,
+  onToggleStar 
+}: QuestionRowProps) => {
   return (
     <Draggable draggableId={question.id} index={index}>
       {(provided, snapshot) => (
@@ -28,7 +37,7 @@ const QuestionRow = ({ question, index, onEdit, onDelete }: QuestionRowProps) =>
             snapshot.isDragging
               ? 'border-primary/40 bg-accent shadow-lg'
               : 'border-transparent bg-card hover:border-border hover:bg-muted/40'
-          }`}
+          } ${question.completed ? 'bg-muted/30 opacity-60' : ''}`}
         >
           <div
             {...provided.dragHandleProps}
@@ -37,11 +46,20 @@ const QuestionRow = ({ question, index, onEdit, onDelete }: QuestionRowProps) =>
             <GripVertical className="h-4 w-4" />
           </div>
 
+          <input
+            type="checkbox"
+            checked={question.completed}
+            onChange={() => onToggle(question.id)}
+            className="h-4 w-4 rounded border-primary text-primary focus:ring-primary"
+          />
+
           <span className="min-w-[2ch] text-xs font-medium text-muted-foreground">
             {index + 1}.
           </span>
 
-          <span className="flex-1 text-sm font-medium">{question.title}</span>
+          <span className={`flex-1 text-sm font-medium ${question.completed ? 'line-through text-muted-foreground' : ''}`}>
+            {question.title}
+          </span>
 
           <Badge
             variant="outline"
@@ -60,6 +78,15 @@ const QuestionRow = ({ question, index, onEdit, onDelete }: QuestionRowProps) =>
               <ExternalLink className="h-3.5 w-3.5" />
             </a>
           )}
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`h-7 w-7 ${question.isStarred ? 'text-yellow-500 hover:text-yellow-600' : 'text-muted-foreground/40 hover:text-foreground'}`}
+            onClick={() => onToggleStar(question.id)}
+          >
+            <Star className={`h-3.5 w-3.5 ${question.isStarred ? 'fill-current' : ''}`} />
+          </Button>
 
           <div className="flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
             <Button

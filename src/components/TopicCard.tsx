@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   ChevronDown,
   ChevronRight,
@@ -6,12 +5,14 @@ import {
   Plus,
   Pencil,
   Trash2,
+  Star,
 } from 'lucide-react';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import type { Topic, SubTopic, Question } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import QuestionRow from './QuestionRow';
+import { useQuestionStore } from '@/store/questionStore';
 
 interface TopicCardProps {
   topic: Topic;
@@ -26,6 +27,10 @@ interface TopicCardProps {
   onAddQuestion: (topicId: string, subTopicId?: string) => void;
   onEditQuestion: (question: Question) => void;
   onDeleteQuestion: (id: string) => void;
+  onToggleQuestion: (id: string) => void;
+  onToggleStarQuestion: (id: string) => void;
+  onToggleStarTopic: (id: string) => void;
+  onToggleStarSubTopic: (id: string) => void;
 }
 
 const TopicCard = ({
@@ -41,16 +46,17 @@ const TopicCard = ({
   onAddQuestion,
   onEditQuestion,
   onDeleteQuestion,
+
+  onToggleQuestion,
+  onToggleStarQuestion,
+  onToggleStarTopic,
+  onToggleStarSubTopic,
 }: TopicCardProps) => {
-  const [expanded, setExpanded] = useState(false);
-  const [expandedSubs, setExpandedSubs] = useState<Record<string, boolean>>({});
+  const store = useQuestionStore();
+  const expanded = store.expandedTopics[topic.id] ?? false;
 
   const topicQuestions = questions.filter((q) => q.topic === topic.id);
   const directQuestions = topicQuestions.filter((q) => !q.subTopic);
-
-  const toggleSub = (id: string) => {
-    setExpandedSubs((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
 
   return (
     <Draggable draggableId={topic.id} index={index}>
@@ -63,7 +69,33 @@ const TopicCard = ({
           }`}
         >
           {/* Topic Header */}
-          <div className="flex items-center gap-2 px-4 py-3">
+          <div className="relative flex items-center gap-2 px-4 py-3">
+            {/* Trigger Droppable for Questions */}
+            <Droppable droppableId={`trigger-topic-q-${topic.id}`} type="question">
+              {(provided) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className="absolute inset-0 z-10 pointer-events-none"
+                >
+                  <div className="w-full h-full" />
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+            {/* Trigger Droppable for SubTopics */}
+            <Droppable droppableId={`trigger-topic-st-${topic.id}`} type="subTopic">
+              {(provided) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className="absolute inset-0 z-10 pointer-events-none"
+                >
+                  <div className="w-full h-full" />
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
             <div
               {...provided.dragHandleProps}
               className="drag-handle flex-shrink-0 text-muted-foreground/40 transition-colors hover:text-muted-foreground"
@@ -72,7 +104,7 @@ const TopicCard = ({
             </div>
 
             <button
-              onClick={() => setExpanded(!expanded)}
+              onClick={() => store.toggleTopicExpansion(topic.id)}
               className="flex flex-1 items-center gap-2"
             >
               {expanded ? (
@@ -87,6 +119,17 @@ const TopicCard = ({
             </button>
 
             <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`h-7 w-7 ${topic.isStarred ? 'text-yellow-500 hover:text-yellow-600' : 'text-muted-foreground/60 hover:text-foreground'}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleStarTopic(topic.id);
+                }}
+              >
+                <Star className={`h-3.5 w-3.5 ${topic.isStarred ? 'fill-current' : ''}`} />
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"
@@ -124,7 +167,7 @@ const TopicCard = ({
                   <div ref={provided.innerRef} {...provided.droppableProps}>
                     {subTopics.map((subTopic, index) => {
                       const subQuestions = questions.filter((q) => q.subTopic === subTopic.id);
-                      const isSubExpanded = expandedSubs[subTopic.id] ?? true;
+                      const isSubExpanded = store.expandedSubTopics[subTopic.id] ?? true;
 
                       return (
                         <Draggable key={subTopic.id} draggableId={subTopic.id} index={index}>
@@ -134,15 +177,33 @@ const TopicCard = ({
                               {...provided.draggableProps}
                               className={`mt-2 ${snapshot.isDragging ? 'opacity-50' : ''}`}
                             >
-                              <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
+                              <div className="relative flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
                                 <div
                                   {...provided.dragHandleProps}
                                   className="cursor-grab text-muted-foreground/40 hover:text-muted-foreground active:cursor-grabbing"
                                 >
                                   <GripVertical className="h-4 w-4" />
                                 </div>
+
+                                {/* Trigger Droppable for Questions on SubTopic */}
+                                <div className="absolute inset-0 pointer-events-none">
+                                  <Droppable
+                                    droppableId={`trigger-subtopic-q-${subTopic.id}`}
+                                    type="question"
+                                  >
+                                    {(provided) => (
+                                      <div
+                                        ref={provided.innerRef}
+                                        {...provided.droppableProps}
+                                        className="w-full h-full"
+                                      >
+                                        {provided.placeholder}
+                                      </div>
+                                    )}
+                                  </Droppable>
+                                </div>
                                 <button
-                                  onClick={() => toggleSub(subTopic.id)}
+                                  onClick={() => store.toggleSubTopicExpansion(subTopic.id)}
                                   className="flex flex-1 items-center gap-2"
                                 >
                                   {isSubExpanded ? (
@@ -155,6 +216,19 @@ const TopicCard = ({
                                     {subQuestions.length}
                                   </Badge>
                                 </button>
+                                
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className={`h-6 w-6 mr-1 ${subTopic.isStarred ? 'text-yellow-500 hover:text-yellow-600' : 'text-muted-foreground/40 hover:text-foreground'}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onToggleStarSubTopic(subTopic.id);
+                                  }}
+                                >
+                                  <Star className={`h-3 w-3 ${subTopic.isStarred ? 'fill-current' : ''}`} />
+                                </Button>
+
                                 <div className="flex gap-0.5">
                                   <Button
                                     variant="ghost"
@@ -199,6 +273,8 @@ const TopicCard = ({
                                           index={qi}
                                           onEdit={onEditQuestion}
                                           onDelete={onDeleteQuestion}
+                                          onToggle={onToggleQuestion}
+                                          onToggleStar={onToggleStarQuestion}
                                         />
                                       ))}
                                       {droppableProvided.placeholder}
@@ -232,6 +308,8 @@ const TopicCard = ({
                           index={qi}
                           onEdit={onEditQuestion}
                           onDelete={onDeleteQuestion}
+                          onToggle={onToggleQuestion}
+                          onToggleStar={onToggleStarQuestion}
                         />
                       ))}
                       {droppableProvided.placeholder}
