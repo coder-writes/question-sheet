@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { DragDropContext, Droppable, type DropResult, type DragUpdate } from '@hello-pangea/dnd';
 import { useQuestionStore } from '@/store/questionStore';
 import type { Question } from '@/types';
@@ -8,11 +8,16 @@ import FormDialog from '@/components/FormDialog';
 import { DragConfirmDialog } from '@/components/DragConfirmDialog';
 import { ProfileDialog } from '@/components/ProfileDialog';
 import { Loader2 } from 'lucide-react';
+import { toast } from "sonner";
+import RandomQuestionDialog from '@/components/RandomQuestionDialog';
 
 const Index = () => {
   const store = useQuestionStore();
   const dialog = store.dialog;
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [randomDialogOpen, setRandomDialogOpen] = useState(false);
+  const [randomQuestion, setRandomQuestion] = useState<Question | null>(null);
 
   useEffect(() => {
     if (store.questions.length === 0 && !store.isLoading && !store.error) {
@@ -178,6 +183,19 @@ const Index = () => {
     [store]
   );
 
+
+
+  const handleRandomQuestion = useCallback(() => {
+    const allQuestions = store.questions;
+    if (allQuestions.length === 0) {
+      toast.error("No questions available to pick from!");
+      return;
+    }
+    const randomIndex = Math.floor(Math.random() * allQuestions.length);
+    setRandomQuestion(allQuestions[randomIndex]);
+    setRandomDialogOpen(true);
+  }, [store.questions]);
+
   const handleDialogSubmit = useCallback(
     (values: Record<string, string>) => {
       if (!dialog) return;
@@ -317,6 +335,7 @@ const Index = () => {
         onToggleFollow={store.toggleFollowing}
         onOpenProfile={() => store.setProfileOpen(true)}
         onCollapseAll={store.collapseAll}
+        onRandomQuestion={handleRandomQuestion}
       />
 
       <main className="container mx-auto px-4 py-6 sm:px-6">
@@ -378,7 +397,13 @@ const Index = () => {
       )}
 
       <DragConfirmDialog state={store.dragConfirmDialog} />
+      <DragConfirmDialog state={store.dragConfirmDialog} />
       <ProfileDialog />
+      <RandomQuestionDialog
+        open={randomDialogOpen}
+        onOpenChange={setRandomDialogOpen}
+        question={randomQuestion}
+      />
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { Share2, Home, ChevronRight, Menu, Moon, Sun, User, Check } from 'lucide-react';
+import { Share2, Home, ChevronRight, Menu, Moon, Sun, User, Check, Shuffle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/components/theme-provider';
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ interface HeaderProps {
   onToggleFollow: () => void;
   onOpenProfile: () => void;
   onCollapseAll: () => void;
+  onRandomQuestion: () => void;
 }
 
 const Header = ({ 
@@ -21,7 +22,8 @@ const Header = ({
   onAddTopic, 
   onToggleFollow,
   onOpenProfile,
-  onCollapseAll
+  onCollapseAll,
+  onRandomQuestion
 }: HeaderProps) => {
   const { theme, setTheme } = useTheme();
   
@@ -142,6 +144,10 @@ const Header = ({
                  </Button>
                  <Button onClick={onAddTopic} size="sm">
                    Add Topic
+                 </Button>
+                 <Button variant="outline" size="sm" className="gap-2" onClick={onRandomQuestion}>
+                   <Shuffle className="h-4 w-4" />
+                   Random
                  </Button>
              </div>
 
