@@ -1,5 +1,7 @@
 import type { Question, Topic, SubTopic } from '@/types';
 
+import localData from '@/data/sheet.json';
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 export interface ApiQuestion {
@@ -14,7 +16,7 @@ export interface ApiQuestion {
 }
 
 export interface ApiResponse {
-  status: {
+  status?: {
     code: number;
     success: boolean;
     message: string;
@@ -29,20 +31,14 @@ export interface ApiResponse {
   };
 }
 
-export const fetchSheetData = async (): Promise<{ topics: Topic[]; subTopics: SubTopic[]; questions: Question[] }> => {
-  const response = await fetch(API_URL);
-  const json: ApiResponse = await response.json();
-
-  if (!json.status.success) {
-    throw new Error(json.status.message || 'Failed to fetch sheet data');
-  }
-
-  const { sheet, questions: apiQuestions } = json.data;
+// Helper to transform raw API/JSON data into app state format
+const transformSheetData = (data: ApiResponse['data']) => {
+  const { sheet, questions: apiQuestions } = data;
   const topicOrder = sheet.config.topicOrder;
 
   // Map Topics
   const topics: Topic[] = topicOrder.map((name) => ({
-    id: name, // Using name as ID for simplicity and stability across re-fetches
+    id: name,
     name,
   }));
 
@@ -54,7 +50,6 @@ export const fetchSheetData = async (): Promise<{ topics: Topic[]; subTopics: Su
     // Determine SubTopic if exists
     let subTopicId: string | undefined = undefined;
     if (q.subTopic) {
-      // Create a unique ID for the subtopic: TopicName-SubTopicName
       subTopicId = `${q.topic}-${q.subTopic}`;
       if (!subTopicsMap.has(subTopicId)) {
         subTopicsMap.set(subTopicId, {
@@ -73,11 +68,11 @@ export const fetchSheetData = async (): Promise<{ topics: Topic[]; subTopics: Su
       link: q.questionId.problemUrl,
       topic: q.topic,
       subTopic: subTopicId,
-      completed: false, // Default to false
+      completed: false,
     });
   });
 
-  // Hardcoded Subtopics
+  // Hardcoded Subtopics (Preserved for backward compatibility/ensuring structure)
   const HARDCODED_SUBTOPICS: Record<string, string[]> = {
     'Arrays': ['Sorting', 'Two Pointer', 'Sliding Window'],
     'Arrays Part-II': ['Kadane\'s Algorithm', 'Merge Overlapping'],
@@ -120,4 +115,27 @@ export const fetchSheetData = async (): Promise<{ topics: Topic[]; subTopics: Su
     subTopics: Array.from(subTopicsMap.values()),
     questions,
   };
+};
+
+export const fetchSheetData = async (): Promise<{ topics: Topic[]; subTopics: SubTopic[]; questions: Question[] }> => {
+  try {
+    console.log('Fetching from API:', API_URL);
+    const response = await fetch(API_URL);
+    const json: ApiResponse = await response.json();
+
+    if (json.status && !json.status.success) {
+      throw new Error(json.status.message || 'Failed to fetch sheet data');
+    }
+
+    return transformSheetData(json.data);
+  } catch (error) {
+    console.warn('API Fetch failed, using local fallback data:', error);
+    // Fallback to local data
+    // The local JSON structure matches the 'ApiResponse' interface roughly,
+    // but might miss the 'status' wrapper or match the 'data' part directly 
+    // depending on how it was saved.
+    // Based on the file content provided:
+    // { "data": { "sheet": ..., "questions": ... } }
+    return transformSheetData((localData as unknown as ApiResponse).data);
+  }
 };

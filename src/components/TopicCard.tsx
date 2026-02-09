@@ -161,148 +161,163 @@ const TopicCard = ({
           </div>
 
           {/* Expanded content */}
-          {expanded && (
-            <div className="border-t px-4 pb-4 pt-2">
-              {/* Sub-topics */}
-              <Droppable droppableId={`subTopics-${topic.id}`} type="subTopic">
-                {(provided) => (
-                  <div ref={provided.innerRef} {...provided.droppableProps}>
-                    {subTopics.map((subTopic, index) => {
-                      const subQuestions = questions.filter((q) => q.subTopic === subTopic.id);
-                      const isSubExpanded = store.expandedSubTopics[subTopic.id] ?? true;
+          {/* Expanded content */}
+          <div
+            className={`grid transition-grid-rows ${
+              expanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+            }`}
+          >
+            <div className="overflow-hidden">
+              <div className="border-t px-4 pb-4 pt-2">
+                {/* Sub-topics */}
+                <Droppable droppableId={`subTopics-${topic.id}`} type="subTopic">
+                  {(provided) => (
+                    <div ref={provided.innerRef} {...provided.droppableProps}>
+                      {subTopics.map((subTopic, index) => {
+                        const subQuestions = questions.filter((q) => q.subTopic === subTopic.id);
+                        const isSubExpanded = store.expandedSubTopics[subTopic.id] ?? true;
 
-                      return (
-                        <Draggable key={subTopic.id} draggableId={subTopic.id} index={index}>
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              className={`mt-2 ${snapshot.isDragging ? 'opacity-50' : ''}`}
-                            >
-                              <div className="relative flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
-                                <div
-                                  {...provided.dragHandleProps}
-                                  className="cursor-grab text-muted-foreground/40 hover:text-muted-foreground active:cursor-grabbing"
-                                >
-                                  <GripVertical className="h-4 w-4" />
-                                </div>
-
-                                {/* Trigger Droppable for Questions on SubTopic */}
-                                <div className="absolute inset-0 pointer-events-none">
-                                  <Droppable
-                                    droppableId={`trigger-subtopic-q-${subTopic.id}`}
-                                    type="question"
+                        return (
+                          <Draggable key={subTopic.id} draggableId={subTopic.id} index={index}>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                className={`mt-2 ${snapshot.isDragging ? 'opacity-50' : ''}`}
+                              >
+                                <div className="relative flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
+                                  <div
+                                    {...provided.dragHandleProps}
+                                    className="cursor-grab text-muted-foreground/40 hover:text-muted-foreground active:cursor-grabbing"
                                   >
-                                    {(provided) => (
-                                      <div
-                                        ref={provided.innerRef}
-                                        {...provided.droppableProps}
-                                        className="w-full h-full"
-                                      >
-                                        {provided.placeholder}
-                                      </div>
+                                    <GripVertical className="h-4 w-4" />
+                                  </div>
+
+                                  {/* Trigger Droppable for Questions on SubTopic */}
+                                  <div className="absolute inset-0 pointer-events-none">
+                                    <Droppable
+                                      droppableId={`trigger-subtopic-q-${subTopic.id}`}
+                                      type="question"
+                                    >
+                                      {(provided) => (
+                                        <div
+                                          ref={provided.innerRef}
+                                          {...provided.droppableProps}
+                                          className="w-full h-full"
+                                        >
+                                          {provided.placeholder}
+                                        </div>
+                                      )}
+                                    </Droppable>
+                                  </div>
+                                  <button
+                                    onClick={() => store.toggleSubTopicExpansion(subTopic.id)}
+                                    className="flex flex-1 items-center gap-2"
+                                  >
+                                    {isSubExpanded ? (
+                                      <ChevronDown className="h-3.5 w-3.5 text-primary" />
+                                    ) : (
+                                      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
                                     )}
-                                  </Droppable>
-                                </div>
-                                <button
-                                  onClick={() => store.toggleSubTopicExpansion(subTopic.id)}
-                                  className="flex flex-1 items-center gap-2"
-                                >
-                                  {isSubExpanded ? (
-                                    <ChevronDown className="h-3.5 w-3.5 text-primary" />
-                                  ) : (
-                                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-                                  )}
-                                  <span className="text-sm font-medium">{subTopic.name}</span>
-                                  <Badge variant="outline" className="text-[10px]">
-                                    {subQuestions.length}
-                                  </Badge>
-                                </button>
-                                
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className={`h-6 w-6 mr-1 ${subTopic.isStarred ? 'text-yellow-500 hover:text-yellow-600' : 'text-muted-foreground/40 hover:text-foreground'}`}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onToggleStarSubTopic(subTopic.id);
-                                  }}
-                                >
-                                  <Star className={`h-3 w-3 ${subTopic.isStarred ? 'fill-current' : ''}`} />
-                                </Button>
+                                    <span className="text-sm font-medium">{subTopic.name}</span>
+                                    <Badge variant="outline" className="text-[10px]">
+                                      {subQuestions.length}
+                                    </Badge>
+                                  </button>
+                                  
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className={`h-6 w-6 mr-1 ${subTopic.isStarred ? 'text-yellow-500 hover:text-yellow-600' : 'text-muted-foreground/40 hover:text-foreground'}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onToggleStarSubTopic(subTopic.id);
+                                    }}
+                                  >
+                                    <Star className={`h-3 w-3 ${subTopic.isStarred ? 'fill-current' : ''}`} />
+                                  </Button>
 
-                                <div className="flex gap-0.5">
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6"
-                                    onClick={() => onAddQuestion(topic.id, subTopic.id)}
-                                    title="Add question"
-                                  >
-                                    <Plus className="h-3 w-3" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6"
-                                    onClick={() => onEditSubTopic(subTopic)}
-                                  >
-                                    <Pencil className="h-2.5 w-2.5" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6 text-destructive hover:text-destructive"
-                                    onClick={() => onDeleteSubTopic(subTopic.id)}
-                                  >
-                                    <Trash2 className="h-2.5 w-2.5" />
-                                  </Button>
+                                  <div className="flex gap-0.5">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-6 w-6"
+                                      onClick={() => onAddQuestion(topic.id, subTopic.id)}
+                                      title="Add question"
+                                    >
+                                      <Plus className="h-3 w-3" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-6 w-6"
+                                      onClick={() => onEditSubTopic(subTopic)}
+                                    >
+                                      <Pencil className="h-2.5 w-2.5" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-6 w-6 text-destructive hover:text-destructive"
+                                      onClick={() => onDeleteSubTopic(subTopic.id)}
+                                    >
+                                      <Trash2 className="h-2.5 w-2.5" />
+                                    </Button>
+                                  </div>
+                                </div>
+
+                                <div
+                                  className={`grid transition-grid-rows ${
+                                    isSubExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                                  }`}
+                                >
+                                  <div className="overflow-hidden">
+                                    <Droppable droppableId={`questions-${subTopic.id}`} type="question">
+                                      {(droppableProvided, snapshot) => (
+                                        <div
+                                          ref={droppableProvided.innerRef}
+                                          {...droppableProvided.droppableProps}
+                                          className={`ml-4 mt-1 space-y-0.5 min-h-[2px] ${
+                                            snapshot.isDraggingOver ? 'bg-primary/5 rounded-md transition-colors' : ''
+                                          }`}
+                                        >
+                                          {subQuestions.map((q, qi) => (
+                                            <QuestionRow
+                                              key={q.id}
+                                              question={q}
+                                              index={qi}
+                                              onEdit={onEditQuestion}
+                                              onDelete={onDeleteQuestion}
+                                              onToggle={onToggleQuestion}
+                                              onToggleStar={onToggleStarQuestion}
+                                              onNotes={onNotes}
+                                            />
+                                          ))}
+                                          {droppableProvided.placeholder}
+                                        </div>
+                                      )}
+                                    </Droppable>
+                                  </div>
                                 </div>
                               </div>
+                            )}
+                          </Draggable>
+                        );
+                      })}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
 
-                              {isSubExpanded && subQuestions.length > 0 && (
-                                <Droppable droppableId={`questions-${subTopic.id}`} type="question">
-                                  {(droppableProvided) => (
-                                    <div
-                                      ref={droppableProvided.innerRef}
-                                      {...droppableProvided.droppableProps}
-                                      className="ml-4 mt-1 space-y-0.5"
-                                    >
-                                      {subQuestions.map((q, qi) => (
-                                        <QuestionRow
-                                          key={q.id}
-                                          question={q}
-                                          index={qi}
-                                          onEdit={onEditQuestion}
-                                          onDelete={onDeleteQuestion}
-                                          onToggle={onToggleQuestion}
-                                          onToggleStar={onToggleStarQuestion}
-                                          onNotes={onNotes}
-                                        />
-                                      ))}
-                                      {droppableProvided.placeholder}
-                                    </div>
-                                  )}
-                                </Droppable>
-                              )}
-                            </div>
-                          )}
-                        </Draggable>
-                      );
-                    })}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-
-              {/* Direct questions (no sub-topic) */}
-              {directQuestions.length > 0 && (
+                {/* Direct questions (no sub-topic) */}
                 <Droppable droppableId={`questions-${topic.id}`} type="question">
-                  {(droppableProvided) => (
+                  {(droppableProvided, snapshot) => (
                     <div
                       ref={droppableProvided.innerRef}
                       {...droppableProvided.droppableProps}
-                      className="mt-2 space-y-0.5"
+                      className={`mt-2 space-y-0.5 min-h-[10px] ${
+                        snapshot.isDraggingOver ? 'bg-primary/5 rounded-md transition-colors' : ''
+                      }`}
                     >
                       {directQuestions.map((q, qi) => (
                         <QuestionRow
@@ -320,20 +335,20 @@ const TopicCard = ({
                     </div>
                   )}
                 </Droppable>
-              )}
 
-              {/* Add question to topic directly */}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="mt-2 w-full justify-start gap-1.5 text-muted-foreground hover:text-foreground"
-                onClick={() => onAddQuestion(topic.id)}
-              >
-                <Plus className="h-3.5 w-3.5" />
-                Add question
-              </Button>
+                {/* Add question to topic directly */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="mt-2 w-full justify-start gap-1.5 text-muted-foreground hover:text-foreground"
+                  onClick={() => onAddQuestion(topic.id)}
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add question
+                </Button>
+              </div>
             </div>
-          )}
+          </div>
         </div>
       )}
     </Draggable>

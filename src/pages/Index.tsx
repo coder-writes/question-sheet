@@ -172,7 +172,7 @@ const Index = () => {
               }
             }
             timeoutRef.current = null;
-          }, 500); // 500ms delay
+          }, 300); // 300ms delay
         }
       } else {
         if (timeoutRef.current) {

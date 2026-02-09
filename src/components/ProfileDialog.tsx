@@ -26,7 +26,7 @@ export const ProfileDialog = () => {
 
   return (
     <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
+      <DialogContent className="max-w-2xl h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl">
             <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -74,7 +74,7 @@ export const ProfileDialog = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="questions" className="flex-1 flex flex-col mt-6 overflow-hidden">
+        <Tabs defaultValue="questions" className="flex-1 flex flex-col mt-6 overflow-hidden min-h-0">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="questions" className="gap-2">
                 <BookOpen className="h-4 w-4" /> Questions ({starredQuestions.length})
