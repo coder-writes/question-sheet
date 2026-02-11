@@ -41,18 +41,26 @@ Follow these steps to run the project locally:
     cd question-sheet-codolio
     ```
 
-2.  **Install dependencies:**
+
+2.  **Configure Environment Variables:**
+    Create a `.env` file in the root directory and add the following line:
+    ```env
+    VITE_API_URL=https://node.codolio.com/api/question-tracker/v1/sheet/public/get-sheet-by-slug/striver-sde-sheet
+    ```
+
+3.  **Install dependencies:**
     ```bash
     npm install
     ```
 
-3.  **Run the development server:**
+
+4.  **Run the development server:**
     ```bash
     npm run dev
     ```
     Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-4.  **Build for production:**
+5.  **Build for production:**
     ```bash
     npm run build
     ```
